@@ -50,6 +50,23 @@ def is_valid(word,correct_pos,present,absent,protected):
     
     return True
 
+def best_guess(words):
+    freq={}
+    for w in words:
+        for letter in set(w):
+            freq[letter] = freq.get(letter,0)+1
+
+    best_word = None
+    best_score = -1
+
+    for w in words:
+        score=sum(freq[letter] for letter in set(w))
+        if score > best_score:
+            best_score = score
+            best_word = w
+        
+    return best_word
+
 options=Options()
 
 options.add_argument("--start-maximised")
@@ -131,22 +148,91 @@ game_tile = driver.execute_script(
 )
 print("number of tiles found:",len(game_tile))
 
-word = "adieu"
-for ch in word:
-    driver.find_element(By.TAG_NAME,"body").send_keys(ch)
+# word = "adieu"
+# for ch in word:
+#     driver.find_element(By.TAG_NAME,"body").send_keys(ch)
 
-driver.find_element(By.TAG_NAME,"body").send_keys(Keys.ENTER)
+# driver.find_element(By.TAG_NAME,"body").send_keys(Keys.ENTER)
 
-tile_later = driver.execute_script(
-    "return arguments[0].querySelectorAll('game-tile')",
-    tile_row
-)
+# tile_later = driver.execute_script(
+#     "return arguments[0].querySelectorAll('game-tile')",
+#     tile_row
+# )
 
-feedback= []
-for tile in tile_later:
-    letter = tile.get_attribute("letter")
-    evaluation = tile.get_attribute("evaluation")
-    feedback.append((letter,evaluation))
+
+
+used = set()
+MAX_TRIES = 6
+
+for turn in range(MAX_TRIES):
+    feedback= []
+
+    # guess = None          previously first word utha liya jo tha 
+    # for w in words:
+    #     if w not in used:
+    #         guess=w
+    #         break
+
+    #now we pick the score based guess
+
+    guess = best_guess(words)
+
+    if guess is None:
+        print("no new words left to try")
+        break
+    
+    used.add(guess)
+    print(f"Turn{turn+1}:guess {guess}") #guess number
+
+
+    for letter in guess:
+        driver.find_element(By.TAG_NAME,"body").send_keys(letter)       #typing guess
+    
+    driver.find_element(By.TAG_NAME,"body").send_keys(Keys.ENTER)
+    time.sleep(4)
+
+
+    # tiles = driver.execute_script(
+    #     "return arguments[0].querySelectorAll('game-tile')",
+    #     tile_row
+    # ) 
+
+    row_shadow = driver.execute_script(
+        "return arguments[0].shadowRoot",
+        game_row[turn]
+    )
+
+    tile_row = driver.execute_script(
+        "return arguments[0].querySelector('.row')",
+        row_shadow
+    )
+
+    tiles = driver.execute_script(
+        "return arguments[0].querySelectorAll('game-tile')",
+        tile_row
+    )
+
+    for tile in tiles:
+        letter = tile.get_attribute("letter")
+        evaluation = tile.get_attribute("evaluation")
+        feedback.append((letter,evaluation))
+
+    if all(evaluation == "correct" for _,evaluation in feedback):
+        print("Solved !")
+        break
+
+    old_count = len(words)
+    words = filter_words(words,feedback)
+    print("Words reduced:",old_count,"->",len(words))
+
+
+
+
+# feedback= []
+# for tile in tile_later:
+#     letter = tile.get_attribute("letter")
+#     evaluation = tile.get_attribute("evaluation")
+#     feedback.append((letter,evaluation))
 
 time.sleep(3)
 
