@@ -4,7 +4,51 @@ from selenium.webdriver.chrome.options import Options #chrome opening options
 from webdriver_manager.chrome import ChromeDriverManager #makes sure chrome sahi se chale
 from selenium.webdriver.common.by import By #locator
 from selenium.webdriver.common.keys import Keys 
-import time 
+import time
+
+with open("wordle data.txt","r") as f:
+    words = [line.strip() for line in f if line.strip()]
+
+print(f"Total words loaded: ",len(words))
+
+def filter_words(words,feedback):
+    correct_pos = {}
+    present=[]
+    absent=[]
+
+    for i,(letter,evaluation) in enumerate(feedback):
+        if evaluation == "correct":
+            correct_pos[i] = letter
+        elif evaluation =="present":
+            present.append((i,letter))
+        elif evaluation =="absent":
+            absent.append(letter)
+
+    protected = set(correct_pos.values()) | {letter for _,letter in present}
+
+    new_words = []
+    for word in words:
+        if is_valid(word,correct_pos,present,absent,protected):
+            new_words.append(word)
+
+    return new_words
+
+
+def is_valid(word,correct_pos,present,absent,protected):
+    for i,letter in correct_pos.items():
+        if word[i]!= letter:
+            return False
+    for i,letter in present:
+        if letter not in word:
+            return False
+        if word[i]==letter:
+            return False
+        
+    for letter in absent:
+        if letter not in protected and letter in word:
+            return False
+    
+    return True
 
 options=Options()
 
@@ -98,11 +142,17 @@ tile_later = driver.execute_script(
     tile_row
 )
 
-for i,tile in enumerate(tile_later):
+feedback= []
+for tile in tile_later:
     letter = tile.get_attribute("letter")
     evaluation = tile.get_attribute("evaluation")
-    print(f"Tile {i}: letter = {letter} , state = {evaluation}")
+    feedback.append((letter,evaluation))
 
 time.sleep(3)
+
+old_count = len(words)
+words = filter_words(words,feedback)
+print("Words reduced:",old_count,"->",len(words))
+
 
 driver.quit()
