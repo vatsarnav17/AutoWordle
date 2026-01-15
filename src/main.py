@@ -1,6 +1,7 @@
 from solver import filter_words,best_guess
 from browser import create_driver
 from page import WordlePage
+from logger import Excel_Logger
 
 with open("../data/wordle data.txt","r") as f:
     words = [line.strip() for line in f if line.strip()] #loading files
@@ -11,6 +12,9 @@ driver = create_driver() #driver created
 driver.get("https://wordleunlimited.org/")
 
 page = WordlePage(driver)   #page accessed, DOM traversed with all req elements
+
+logger = Excel_Logger()
+logger.start_new_game()
 
 used = set()
 MAX_TRIES = 6
@@ -30,6 +34,8 @@ for turn in range(MAX_TRIES):   #start soln
     page.type_word(guess)   #type selected word
 
     feedback = page.read_rows(turn) #post typing acquire feedback
+
+    logger.log_turn(turn,feedback)
     
 
     if all(evaluation == "correct" for _,evaluation in feedback):   #analyse
