@@ -27,15 +27,15 @@ class WordlePage:
             self.game_theme_manager
         )
 
-        game_modal = self.driver.execute_script(
+        self.game_modal = self.driver.execute_script(
             "return arguments[0].querySelector('game-modal')",
             self.game_box
         )
 
-        if game_modal:
+        if self.game_modal:
             shadow_root_close = self.driver.execute_script(
                 "return arguments[0].shadowRoot",
-                game_modal
+                self.game_modal
             )
             
             game_overlay = self.driver.execute_script(
@@ -113,3 +113,55 @@ class WordlePage:
             feedback.append((letter,evaluation))
 
         return feedback
+    
+    def get_answer(self):
+
+        self.answer_toaster = self.driver.execute_script(
+            "return arguments[0].querySelector('#game-toaster')",
+            self.game_box
+        )
+
+        if not self.answer_toaster:
+            return None
+
+        game_toast = self.driver.execute_script(
+            "return arguments[0].querySelector('game-toast')",
+            self.answer_toaster
+        )
+
+        ans = game_toast.get_attribute("text")
+
+        if not ans:
+            return None
+        
+        return ans.strip().lower()
+
+    def play_again(self):
+            time.sleep(2)  # Wait for modal to appear
+            
+            # Reinitialize to get fresh reference
+            self._init_dom()
+            
+            # Try to find the refresh button in the stats modal
+            if self.game_modal:
+                stats = self.driver.execute_script(
+                    "return arguments[0].querySelector('game-stats')",
+                    self.game_modal
+                )
+                
+                if stats:
+                    stats_shadow = self.driver.execute_script(
+                        "return arguments[0].shadowRoot",
+                        stats
+                    )
+                    
+                    refresh_btn = self.driver.execute_script(
+                        "return arguments[0].querySelector('#refresh-button')",
+                        stats_shadow
+                    )
+                    
+                    if refresh_btn:
+                        self.driver.execute_script("arguments[0].click()", refresh_btn)
+                        print("Play again button clicked")
+                        time.sleep(3)
+                        return
