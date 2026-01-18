@@ -54,3 +54,20 @@ class Excel_Logger:
                 cell.fill = GREY
         
         self.wb.save(self.path)
+
+    exceptions = {
+        "genius",
+        "magnificent",
+        "impressive",
+        "splendid",
+        "great",
+        "phew"
+    }
+    
+    def log_answer(self,answer):
+        ans = answer.lower()
+
+        if ans not in self.exceptions:
+            self.ws.append([self.game_id,"ANSWER",answer.upper()])
+            self.wb.save(self.path)
+
