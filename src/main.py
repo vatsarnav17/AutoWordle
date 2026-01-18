@@ -2,13 +2,13 @@ from solver import filter_words,best_guess
 from browser import create_driver
 from page import WordlePage
 from logger import Excel_Logger
-import time
 
 driver = create_driver() #driver created
-driver.get("https://wordleunlimited.org/")
-page = WordlePage(driver)   #page accessed, DOM traversed with all req elements
 
 while True:
+    
+    driver.get("https://wordleunlimited.org/")
+    page = WordlePage(driver)   #page accessed, DOM traversed with all req elements
 
     with open("../data/wordle data.txt","r") as f:
         words = [line.strip() for line in f if line.strip()] #loading files
@@ -85,11 +85,5 @@ while True:
                     f.write("\n"+answer.lower())
 
     print("Game finished")
-    user = input("To stop playing, press ENTER")
-
-    if user.strip() == "":
-        break
-    
     page.play_again()
-
-driver.quit()
+    # driver.quit()

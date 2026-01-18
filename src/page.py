@@ -137,7 +137,6 @@ class WordlePage:
         return ans.strip().lower()
 
     def play_again(self):
-        try:
             time.sleep(2)  # Wait for modal to appear
             
             # Reinitialize to get fresh reference
@@ -166,7 +165,3 @@ class WordlePage:
                         print("Play again button clicked")
                         time.sleep(3)
                         return
-            
-            print("Could not find play again button")
-        except Exception as e:
-            print(f"Error in play_again: {e}")
