@@ -9,6 +9,9 @@ while True:
     
     driver.get("https://wordleunlimited.org/")
     page = WordlePage(driver)   #page accessed, DOM traversed with all req elements
+    driver.refresh()  #refresh to avoid stale elements
+    page.play_again()  #start new game if needed
+    page._init_dom()  #reinitialize DOM after play again to avoid stale elements
 
     with open("../data/wordle data.txt","r") as f:
         words = [line.strip() for line in f if line.strip()] #loading files
@@ -49,16 +52,16 @@ while True:
         words = filter_words(words,feedback)    #filter words
         print("Words reduced:",old_count,"->",len(words))   #new words
 
-    while not solved and turn <MAX_TRIES -1:
-        turn+=1
+    while not solved and turn < MAX_TRIES - 1:
+        turn += 1
         if words: #copilot
-            dummy=words[0]
+            dummy = words[0]
         else:
-            dummy=list(used)[0] #copilot
-        print(f"Turn{turn+1}: dummy guess {dummy}")
+            dummy = list(used)[0] #copilot
+        print(f"Turn {turn + 1}: dummy guess {dummy}")
         page.type_word(dummy)
         feedback = page.read_rows(turn)
-        logger.log_turn(turn,feedback)
+        logger.log_turn(turn, feedback)
 
     exceptions = {
         "genius",
@@ -85,5 +88,5 @@ while True:
                     f.write("\n"+answer.lower())
 
     print("Game finished")
-    page.play_again()
+    
     # driver.quit()

@@ -156,7 +156,7 @@ class WordlePage:
                     )
                     
                     refresh_btn = self.driver.execute_script(
-                        "return arguments[0].querySelector('#refresh-button')",
+                        "return arguments[0].querySelector('#refresh-button') || arguments[0].querySelector('button[aria-label*=\"play\"]') || arguments[0].querySelector('button')",
                         stats_shadow
                     )
                     
@@ -164,4 +164,13 @@ class WordlePage:
                         self.driver.execute_script("arguments[0].click()", refresh_btn)
                         print("Play again button clicked")
                         time.sleep(3)
-                        return
+                        return True
+                    else:
+                        print("Refresh button not found in stats shadow")
+                        return False
+                else:
+                    print("Stats element not found")
+                    return False
+            else:
+                print("Game modal not found")
+                return False
