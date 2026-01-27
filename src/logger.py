@@ -38,7 +38,8 @@ class Excel_Logger:
         row=[self.game_id,turn+1]
 
         for letter,_ in feedback:
-            row.append(letter.upper())
+            if letter is not None:
+                row.append(letter.upper())
 
         self.ws.append(row)
         r = self.ws.max_row
