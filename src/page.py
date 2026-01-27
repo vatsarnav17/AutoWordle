@@ -115,7 +115,7 @@ class WordlePage:
         return feedback
     
     def get_answer(self):
-
+        # Toast elements are ephemeral; poll a few times before giving up
         self.answer_toaster = self.driver.execute_script(
             "return arguments[0].querySelector('#game-toaster')",
             self.game_box
@@ -124,17 +124,24 @@ class WordlePage:
         if not self.answer_toaster:
             return None
 
-        game_toast = self.driver.execute_script(
-            "return arguments[0].querySelector('game-toast')",
-            self.answer_toaster
-        )
+        for _ in range(6):
+            # Get text attribute directly to avoid stale element reference
+            ans = self.driver.execute_script(
+                "const toasts = arguments[0].querySelectorAll('game-toast');"
+                "if (toasts && toasts.length) {"
+                "    const lastToast = toasts[toasts.length - 1];"
+                "    return lastToast ? lastToast.getAttribute('text') : null;"
+                "}"
+                "return null;",
+                self.answer_toaster
+            )
 
-        ans = game_toast.get_attribute("text")
+            if ans:
+                return ans.strip().lower()
 
-        if not ans:
-            return None
-        
-        return ans.strip().lower()
+            time.sleep(0.5)
+
+        return None
 
     def play_again(self):
             time.sleep(2)  # Wait for modal to appear
