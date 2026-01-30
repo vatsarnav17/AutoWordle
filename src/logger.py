@@ -7,7 +7,7 @@ YELLOW = PatternFill(start_color="FFD600",end_color="FFD600",fill_type="solid")
 GREY = PatternFill(start_color="BDBDBD",end_color="BDBDBD",fill_type="solid")
 
 class Excel_Logger:
-    def __init__(self,path="wordle_log.xlsx"):
+    def __init__(self,path="wordle log.xlsx"):
         self.path=path
 
         if os.path.exists(self.path):
@@ -38,7 +38,8 @@ class Excel_Logger:
         row=[self.game_id,turn+1]
 
         for letter,_ in feedback:
-            row.append(letter.upper())
+            if letter is not None:
+                row.append(letter.upper())
 
         self.ws.append(row)
         r = self.ws.max_row
