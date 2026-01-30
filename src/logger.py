@@ -7,7 +7,7 @@ YELLOW = PatternFill(start_color="FFD600",end_color="FFD600",fill_type="solid")
 GREY = PatternFill(start_color="BDBDBD",end_color="BDBDBD",fill_type="solid")
 
 class Excel_Logger:
-    def __init__(self,path="wordle_log.xlsx"):
+    def __init__(self,path="wordle log.xlsx"):
         self.path=path
 
         if os.path.exists(self.path):
